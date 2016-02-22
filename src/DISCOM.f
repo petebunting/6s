@@ -13,7 +13,7 @@ c - to vary the number of quadratures
       common /sixs_polar/ pha(nqmax_p),qha(nqmax_p),uha(nqmax_p),
      &alphal(0:nqmax_p),betal(0:nqmax_p),gammal(0:nqmax_p),
      &zetal(0:nqmax_p)
-      real nbmu 
+      integer nbmu 
 c - to vary the number of quadratures
 
 
@@ -23,10 +23,10 @@ c - to vary the number of quadratures
       real ftray,xlm1(-mu:mu,np),xlm2(-mu:mu,np)
       real roatm_fi(3,20,nfi),rorayl_fi(nfi),romix_fi(nfi)
       
-      real rolut(mu,41),roluts(20,mu,41)
-      real rolutq(mu,41),rolutsq(20,mu,41)
-      real rolutu(mu,41),rolutsu(20,mu,41)
-      real filut(mu,41)
+      real rolut(mu,61),roluts(20,mu,61)
+      real rolutq(mu,61),rolutsq(20,mu,61)
+      real rolutu(mu,61),rolutsu(20,mu,61)
+      real filut(mu,61)
       integer nfilut(mu)
       
       real xmus,xmuv,phi

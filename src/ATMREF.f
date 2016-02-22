@@ -4,8 +4,8 @@
      a      ipol,xlm1,xlm2,rorayl_fi,romix_fi,nfi,
      a      nfilut,filut,rolut,rolutq,rolutu)
      
-      real    rolut(mu,41),rolutq(mu,41),rolutu(mu,41),rolutd(mu,41)
-      real    filut(mu,41)
+      real    rolut(mu,61),rolutq(mu,61),rolutu(mu,61),rolutd(mu,61)
+      real    filut(mu,61)
       integer nfilut(mu)
 
       integer mu,np,nfi

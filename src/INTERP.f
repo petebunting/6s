@@ -20,9 +20,9 @@
       Real utinf,utsup,utotc,uainf,uasup,arinf,arsup,atinf,atsup
       Real aainf,aasup,depolar1,depolar2
       real romix_fi(nfi),rorayl_fi(nfi),roatm_fi(3,20,nfi)
-      real rolut(mu_p,41),roluts(20,mu_p,41)
-      real rolutq(mu_p,41),rolutsq(20,mu_p,41)
-      real rolutu(mu_p,41),rolutsu(20,mu_p,41)
+      real rolut(mu_p,61),roluts(20,mu_p,61)
+      real rolutq(mu_p,61),rolutsq(20,mu_p,61)
+      real rolutu(mu_p,61),rolutsu(20,mu_p,61)
       integer nfilut(mu_p),mu
       Integer iaer,idatmp,linf,ll,lsup,ipol
 
@@ -175,7 +175,8 @@ C	   rolut(i,j)=roluts(linf,i,j)
 C     &      +(roluts(lsup,i,j)-roluts(linf,i,j))*coefl
 C	endif
 	
-	if ((rolutsq(lsup,i,j).gt.0.001).and.(rolutsq(linf,i,j).gt.0.001)) then
+	if ((rolutsq(lsup,i,j).gt.0.001)
+     &	.and.(rolutsq(linf,i,j).gt.0.001)) then
            alphac=alog(rolutsq(lsup,i,j)/rolutsq(linf,i,j))/coef
            betac=rolutsq(linf,i,j)/(wlinf**(alphac))
 	   rolutq(i,j)=betac*(wl**alphac)
@@ -185,7 +186,8 @@ C	endif
 	endif
 
 
-	if ((rolutsu(lsup,i,j).gt.0.001).and.(rolutsu(linf,i,j).gt.0.001)) then
+	if ((rolutsu(lsup,i,j).gt.0.001)
+     &	.and.(rolutsu(linf,i,j).gt.0.001)) then
            alphac=alog(rolutsu(lsup,i,j)/rolutsu(linf,i,j))/coef
            betac=rolutsu(linf,i,j)/(wlinf**(alphac))
 	   rolutu(i,j)=betac*(wl**alphac)
@@ -201,7 +203,8 @@ C End Look up table update
 
 c we continue with the parameter Q ....
         if(iaer.eq.0) goto 3240
-	if ((qhase(lsup).gt.0.001).and.(qhase(linf).gt.0.001)) then
+	if ((qhase(lsup).gt.0.001)
+     &	.and.(qhase(linf).gt.0.001)) then
         alphaa=alog(qhase(lsup)/qhase(linf))/coef
         betaa=qhase(linf)/(wlinf**(alphaa))
         qhaa=betaa*(wl**alphaa)
@@ -260,7 +263,8 @@ C        write(6,*) "rqaero ",rqaero
 
 c .... and we finish with the parameter U
         if(iaer.eq.0) goto 4242
-	if ((uhase(lsup).gt.0.001).and.(uhase(linf).gt.0.001)) then
+	if ((uhase(lsup).gt.0.001)
+     &	.and.(uhase(linf).gt.0.001)) then
         alphaa=alog(uhase(lsup)/uhase(linf))/coef
         betaa=uhase(linf)/(wlinf**(alphaa))
         uhaa=betaa*(wl**alphaa)
