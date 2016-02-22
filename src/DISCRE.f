@@ -36,6 +36,7 @@
       delta=1./(1.+ta*hr/tr/ha*exp((zx-ppp1)*(1./hr-1./ha)))
       ecart=0
       if(dd.ne.0) ecart=abs((dd-delta)/dd)
-      if((ecart.gt.0.75).and.(it.ne.0)) go to 99
+c      if((ecart.gt.0.75).and.(it.ne.0)) go to 99
+      if((ecart.gt.0.95).and.(it.ne.0)) go to 99
       return
       end

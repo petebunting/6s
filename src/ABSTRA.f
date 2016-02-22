@@ -454,6 +454,7 @@ C
          else
          ttwava=0.
          endif
+c      write(6,*) "waterbug ",ttwava,dtwava,utwava,dtwava*utwava	 	 
       dtdica=tnu(2,1)
       utdica=tnu(2,2)
       ttdica=tnu(2,3)

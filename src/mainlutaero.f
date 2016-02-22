@@ -196,7 +196,7 @@ c     in OSSUR (Vermote, 11/19/2010)
 c***********************************************************************
         real rosur(0:mu_p,mu_p,83) 
 	real wfisur(83),fisur(83)
-	real xlsurf(-mu_p:mu_p,np_p),rolutsurf(mu_p,61)
+	real xlsurf(-mu_p:mu_p,np_p),rolutsurf(mu_p,41)
 	real lddiftt,lddirtt,lsphalbt,ludiftt,ludirtt
 	real lxtrans(-1:1)
 	real rbar,rbarp,rbarc,rbarpc,rbard
@@ -259,8 +259,7 @@ c***********************************************************************
         integer igrou1,igrou2,isort,irapp,ilut
 c variables used in the BRDF coupling correction process
 	real robarstar,robarpstar,robarbarstar,tdd,tdu,tsd,tsu
-	real coefa,coefb,coefc,discri,rogbrdf,roglamb,rbardest
-	real romixatm,romixsur
+	real coefa,coefb,coefc,discri,rogbrdf	
 c variables related to surface polarization
         integer irop
 	real ropq,ropu,pveg,wspd,azw,razw
@@ -305,7 +304,7 @@ c***********************************************************************
       common /sixs_planesim/zpl(34),ppl(34),tpl(34),whpl(34),wopl(34)
       common /sixs_test/xacc
 c***********************************************************************
-c     for considering aerosol and ????
+c     for considering aerosol and brdf
 c***********************************************************************
 
       integer options(5)
@@ -316,7 +315,7 @@ c***********************************************************************
       real rfoamave,rwatave,rglitave
       
       real uli,eei,thmi,sli,cabi,cwi,vaii,rnci,rsl1i
-      real p1,p2,p3,p1p,p2p,p3p
+      real p1,p2,p3
 c***********************************************************************
 c                             return to 6s
 c***********************************************************************
@@ -331,7 +330,7 @@ c***********************************************************************
  
  
 c****************************************************************************c
-c   angmu and angphi are the angles were the  is measured. these values  c
+c   angmu and angphi are the angles were the brdf is measured. these values  c
 c   can be changed as soon as they are well distributed over the whole space c
 c   before the gauss integration, these values are interpolated to the gauss c
 c   angles                                                                   c
@@ -339,9 +338,7 @@ c****************************************************************************c
       data angmu /85.0,80.0,70.0,60.0,50.0,40.0,30.0,20.0,10.0,0.00/
       data angphi/0.00,30.0,60.0,90.0,120.0,150.0,180.0,
      s          210.0,240.0,270.0,300.0,330.0,360.0/
-C*******INTERNAL FLAG*********
-      integer iprtspr
-      data iprtspr /0/ 
+ 
 c***********************************************************************
 c                             return to 6s
 c***********************************************************************
@@ -444,7 +441,7 @@ c***********************************************************************
      s 'subarctic  winter   (uh2o=.419g/cm2,uo3=.480cm-atm)',
      s 'us  standard 1962   (uh2o=1.42g/cm2,uo3=.344cm-atm)'/
  
-      data  reflec /
+        data  reflec /
      & '(1h*,12x,39h user defined spectral reflectance     ,f6.3,t79,1h*) ',
      & '(1h*,12x,27h monochromatic reflectance ,f6.3,t79,1h*)',
      & '(1h*,12x,39h constant reflectance over the spectra ,f6.3,t79,1h*) ',
@@ -610,7 +607,7 @@ c**********************************************************************c
           ilut=0
 	  igeom=0
       endif
-      ilut=0	  
+      ilut=1	  
       goto(1001,1002,1003,1004,1005,1006,1007),igeom
 c   igeom=0.....
 
@@ -1093,7 +1090,6 @@ C compute effective scale heigh
             endif
          endif
       endif
-
 c**********************************************************************c
 c      iwave input of the spectral conditions                          c
 c            --------------------------------                          c
@@ -1315,6 +1311,7 @@ c       198  DMC    band 2           (0.6100-0.7100)                   c
 c       199  DMC    band 3           (0.7525-0.9275)                   c
 c  note: wl has to be in micrometer                                    c
 c**********************************************************************c
+
       do 38 l=iinf,isup
        s(l)=1.
    38 continue
@@ -1391,6 +1388,7 @@ c       164     DMC      band           (197,199)
      s      162,162,162,162,162,162,162,162,162,162,162,162,
      s      163,163,163,163,163,163,163,163,163,163,163,
      s      164,164,164),iwave
+     
   110 read(iread,*) wlinf,wlsup
       iinf=(wlinf-.25)/0.0025+1.5
       isup=(wlsup-.25)/0.0025+1.5
@@ -1448,14 +1446,9 @@ c       164     DMC      band           (197,199)
   164 call dmc(iwave-196)
       goto 19 
 
+
    19 iinf=(wlinf-.25)/0.0025+1.5
       isup=(wlsup-.25)/0.0025+1.5
-      if (iprtspr.eq.1) then
-         do i=iinf,isup
-            write(6,*) "spres ",(i-1)*0.0025+0.25,s(i)
-         enddo
-      endif
-
    20 continue
  
 C***********************************************************************
@@ -1466,7 +1459,7 @@ C     Write(6,*) "TOTO THE HERO"
       
       do i=1,mu
       nfilut(i)=0
-      do j=1,41
+      do j=1,61
       rolut(i,j)=0.
       rolutq(i,j)=0.
       rolutu(i,j)=0.
@@ -1478,6 +1471,7 @@ C     Write(6,*) "TOTO THE HERO"
       enddo
       xmus=cos(asol*pi/180.)
       its=acos(xmus)*180.0/pi
+
 C Case standart LUT      
       if (ilut.eq.1) then
        do i=1,mu-1
@@ -1485,7 +1479,16 @@ C Case standart LUT
          luttv=acos(lutmuv)*180./pi
          iscama=(180-abs(luttv-its))
          iscami=(180-(luttv+its))
-         nbisca=int(0.01+(iscama-iscami)/4.0)+1
+	 if (abs(iscama-iscami).gt.1.E-03) then
+	 frac=(iscama-iscami)-int((iscama-iscami)/4.0)*4.
+	 if (frac.gt.1.E-03) then
+         nbisca=int((iscama-iscami)/4.0)+2
+	 else
+	 nbisca=int((iscama-iscami)/4.0)+1
+	 endif
+	 else
+	 nbisca=1
+	 endif
          nfilut(i)=nbisca
          filut(i,1)=0.0
          filut(i,nbisca)=180.0
@@ -1497,13 +1500,18 @@ C Case standart LUT
      S	  *sqrt(1.-lutmuv*lutmuv))
           filut(i,j)=acos(cfi)*180.0/pi
          enddo
+C	 write(6,*) "LOOKUP DEBUG ", its,luttv,nbisca,iscama,iscami
       enddo
       i=mu
          lutmuv=cos(avis*pi/180.)
          luttv=acos(lutmuv)*180./pi
          iscama=(180-abs(luttv-its))
          iscami=(180-(luttv+its))
-         nbisca=int((iscama-iscami)/4)+1
+	 if (abs(iscama-iscami).gt.1.E-03) then
+         nbisca=int((iscama-iscami)/4)+2
+	 else
+	 nbisca=1
+	 endif
          nfilut(i)=nbisca
          filut(i,1)=0.0
          filut(i,nbisca)=180.0
@@ -1517,6 +1525,9 @@ C Case standart LUT
          enddo
         endif
 C END Case standart LUT      
+
+
+
 
 C Case LUT for APS
       if (ilut.eq.3) then
@@ -1582,9 +1593,6 @@ c      write(6,*) "wlmoy",wlmoy
       if(iaer.ne.0) then
         call specinterp(wlmoy,taer55,taer55p,
      s     tamoy,tamoyp,pizmoy,pizmoyp,ipol)
-      else
-      tamoy=0.
-      tamoyp=0. 
       endif
       call odrayl(wlmoy,
      s                   trmoy)
@@ -1616,7 +1624,7 @@ c                          lambertian                                  c
 c                  idirec=1 ( directional effect)                      c
 c                          you have to specify the brdf of the surface c
 c                           for the actual solar illumination you  are c
-c                           considering as well as the  for a sun  c
+c                           considering as well as the brdf for a sun  c
 c                           which would be at an angle thetav, in      c
 c                           addition you have to give the surface      c
 c                           albedo (spherical albedo). you can also    c
@@ -1815,15 +1823,10 @@ c             cn      - the ratio of refractive indices of the leaf    c
 c                       surface wax and internal material  [1.0]       c
 c             s1      - the weight of the 1st Price function for the   c
 c                       soil reflectance     [0.1..0.8]                c
-c        10  MODIS operational BDRF                                    c
+c        10  MODIS operational BDRF                                     c
 c             the parameters are: p1,p2,p3                             c
 c                 p1 weight for lambertian kernel                      c
 c                 p2 weight for Ross Thick kernel                      c
-c                 p3 weight for Li Sparse  kernel                      c
-c        11  RossLiMaigan  BDRF  model                                 c
-c             the parameters are: p1,p2,p3                             c
-c                 p1 weight for lambertian kernel                      c
-c                 p2 weight for Ross Thick with Hot Spot kernel        c
 c                 p3 weight for Li Sparse  kernel                      c
 c**********************************************************************c
 									
@@ -2209,55 +2212,6 @@ c call for ground boundary condition in OSSURF
          go to 69
       endif
 c
-c**********************************************************************c
-c     brdf from ROSSLIMAIGNAN BRDF   model                                     c
-c**********************************************************************c
-      if(ibrdf.eq.11) then
-         read(iread,*)p1,p2,p3
-	 
-           srm(-1)=phirad
-           srm(1)=xmuv
-           srm(0)=xmus
-           call rlmaignanbrdf(p1,p2,p3
-     s      ,1,1,srm,srp,sbrdftmp)
-        do l=iinf,isup
-           sbrdf(l)=sbrdftmp(1,1)
-           enddo
-c	   stop
-	   
-c	 
-         rm(-mu)=phirad
-         rm(mu)=xmuv
-         rm(0)=xmus
-         call rlmaignanbrdf(p1,p2,p3
-     &            ,mu,np,rm,rp,brdfints)
-         rm(-mu)=2.*pi-phirad
-         rm(mu)=xmus
-         rm(0)=xmuv
-         call rlmaignanbrdf(p1,p2,p3
-     &            ,mu,np,rm,rp,brdfintv)
-c
-         call rlmaignanalbe(p1,p2,p3
-     &                 ,albbrdf)
-     
-c         write(6,*) "GOT TILL HERE "
-c call for ground boundary condition in OSSURF   
-        rm(-mu)=phirad
-        rm(mu)=xmuv
-        rm(0)=xmus          
-        call rlmaignanbrdffos(p1,p2,p3,mu,rm,
-     s       rosur,wfisur,fisur)
-c         do i=0,mu
-c	 do j=1,mu
-c	 do k=1,83
-c         write(6,*) i,j,k,rosur(i,j,k),acos(rm(i))*180./pi,acos(rm(j))*180./pi,fisur(k)*180./pi+180.
-c	 enddo
-c	 enddo
-c	 enddo
-         go to 69
-      endif
-c
-c
    69 continue
 c**********************************************************************c
 c compute the downward irradiance for a sun at thetas and then at      c
@@ -2268,14 +2222,10 @@ c call os to compute downward radiation field for robar
       rm(mu)=xmuv
       rm(0)=-xmus
       spalt=1000.
-c      write(6,*) iaer_prof,tamoy,trmoy,pizmoy,tamoyp,trmoyp,spalt,
-c     s               phirad,nt,mu,np,rm,gb,rp,
-c     s                     xlmus,xlphim,nfi,rolut
       call os(iaer_prof,tamoy,trmoy,pizmoy,tamoyp,trmoyp,spalt,
      s               phirad,nt,mu,np,rm,gb,rp,
      s                     xlmus,xlphim,nfi,rolut)
-c       write(6,*) xlmus
-      romixatm=(xlmus(-mu,1)/xmus)
+      romix=(xlmus(-mu,1)/xmus)
 c      write(6,*) "romix atm", romix,tamoy,trmoy,phirad
 c call os to compute downward radiation field for robarp
       if (idatmp.ne.0) then
@@ -2294,7 +2244,7 @@ c call ossurf to compute the actual brdf coupling
       call ossurf(iaer_prof,tamoyp,trmoyp,pizmoy,tamoyp,trmoyp,spalt,
      s               phirad,nt,mu,np,rm,gb,rp,rosur,wfisur,fisur,
      s                     xlsurf,xlphim,nfi,rolutsurf)
-      romixsur=(xlsurf(-mu,1)/xmus)-romixatm
+      romix=(xlsurf(-mu,1)/xmus)-romix
 c      write(6,*) "romix surf", romix
 c call ISO (twice) to compute the spherical albedo for the equivalent wavelength
 c and diffuse and direct transmission at equivalent vavelength
@@ -2326,7 +2276,6 @@ c normalization. the resulting reflectance is named robar              c
 c**********************************************************************c
       robar1=0.
       xnorm1=0.
-c      write(6,*) xlmus
       do 83 j=1,np
         rob=0.
         xnor=0.
@@ -2375,25 +2324,21 @@ c501  format(5(i10,2x))
       rbarc=rbar*lddiftt*ludirtt
       rbarpc=rbarp*ludiftt*lddirtt
       rdirc=sbrdftmp(1,1)*ludirtt*lddirtt
-      write(6,*) "romixsur,rbarc,rbarpc,rdirc",romixsur,rbarc,rbarpc,rdirc
- 
-      coefc=-(romixsur-rbarc-rbarpc-rdirc)
-c       write(6,*) " lddiftt,ludiftt ", lddiftt,ludiftt 
+c      write(6,*) "rdirc rbarc rbarpc",rdirc,rbarc,rbarpc
+      coefc=-(romix-rbarc-rbarpc-rdirc)
+c      write(6,*) " lddiftt,ludiftt ", lddiftt,ludiftt 
       coefb=lddiftt*ludiftt
       coefa=(lddiftt+lddirtt)*(ludiftt+ludirtt)*lsphalbt
      a  /(1.-lsphalbt*albbrdf)
-       write(6,*) "a,b,c",coefa,coefb,coefc
-       write(6,*) "discri2 ",(coefb*coefb-4*coefa*coefc)
+c      write(6,*) "a,b,c",coefa,coefb,coefc
       discri=sqrt(coefb*coefb-4*coefa*coefc)
       rbard=(-coefb+discri)/(2*coefa)
-        Write(6,*) "rbard albbrdf 1rst iteration", rbard,albbrdf
+c      Write(6,*) "rbard albbrdf 1rst iteration", rbard,albbrdf
       coefa=(lddiftt+lddirtt)*(ludiftt+ludirtt)*lsphalbt
      a  /(1.-lsphalbt*rbard)
-       write(6,*) "a,b,c",coefa,coefb,coefc
-       write(6,*) "discri2 ",(coefb*coefb-4*coefa*coefc)
       discri=sqrt(coefb*coefb-4*coefa*coefc)
       rbard=(-coefb+discri)/(2*coefa)
-       Write(6,*) "rbard albbrdf 2nd iteration", rbard,albbrdf
+c      Write(6,*) "rbard albbrdf 2nd iteration", rbard,albbrdf
       
       do 335 l=iinf,isup
         rocl(l)=sbrdf(l)
@@ -2560,7 +2505,7 @@ C       read(iread,*,end=37) ilut
 	  endif
        if (ibrdf.eq.9) then
           irop=2
-          pveg=uli
+          pveg=ul
 	  if (pveg.gt.1.) pveg=1
 	  call polnad(asol,avis,phi,pveg,ropq,ropu)
 	  endif
@@ -2781,7 +2726,7 @@ c --- ground reflectance (type and spectral variation) ----
 	rwatave=rwatave/seb
 	rglitave=rglitave/seb
 	
-         goto(2000,2001,2002,2003,2004,2005,2006,2007,2008,2010,2011,2012)
+         goto(2000,2001,2002,2003,2004,2005,2006,2007,2008,2010,2011)
      *    ,(ibrdf+1)
  2000    write(iwr, 190)
          write(iwr, 187)
@@ -2846,10 +2791,6 @@ c --- ground reflectance (type and spectral variation) ----
          write(iwr, 187)
      *   rocave,robar1/xnorm1,robar2/xnorm2,rbard,albbrdf
          goto 2009
- 2012    write(iwr, 212)p1,p2,p3
-         write(iwr, 187)
-     *   rocave,robar1/xnorm1,robar2/xnorm2,rbard,albbrdf
-         goto 2009
  2009   endif
       endif
   50  continue
@@ -2895,7 +2836,7 @@ c**********************************************************************c
 c ---- initilialization
 C Start Update Look up table	
 	do i=1,mu
-	do j=1,61
+	do j=1,41
 	roluti(i,j)=0.0
 	rolutiq(i,j)=0.0
 	rolutiu(i,j)=0.0
@@ -3139,7 +3080,7 @@ c           surface reflectance (rpsurf=0.0, avr=0.0, roc=0.0)
 
 C Start Update Look up table	
 	do i=1,mu
-	do j=1,61
+	do j=1,41
 	roluti(i,j)=roluti(i,j)+rolut(i,j)*coef
 	rolutiq(i,j)=rolutiq(i,j)+rolutq(i,j)*coef
 	rolutiu(i,j)=rolutiu(i,j)+rolutu(i,j)*coef
@@ -3610,7 +3551,6 @@ c**********************************************************************c
          rog=rapp/tgasm
          rog=(rog-ainr(1,1)/tgasm)/sutott/sdtott
          rog=rog/(1.+rog*sast)
-	 roglamb=rog
 	 xa=pi*sb/xmus/seb/tgasm/sutott/sdtott
 	 xap=1./tgasm/sutott/sdtott
 	 xb=ainr(1,1)/sutott/sdtott/tgasm
@@ -3618,15 +3558,12 @@ c**********************************************************************c
 	 xc=sast
 c        BRDF coupling correction 
          if (idirec.eq.1) then 
+c compute the coefficient of the 2nd degree equation
+C  a*(ros^2)+b*ros+c	
 C   compute ratios and transmissions
-         if (rocave.lt.1E-09) then
-	 write(6,*) "error rodir is near zero could not proceed with coupling correction"
-	 rogbrdf=-1.
-	 goto 3333
-	 endif
-         robarstar=(robar1/xnorm1)/rocave
-	 robarpstar=(robar2/xnorm2)/rocave
-	 robarbarstar=rbard/rocave
+         robarstar=(robar1/xnorm1)/brdfints(mu,1)
+	 robarpstar=(robar2/xnorm2)/brdfints(mu,1)
+	 robarbarstar=rbard/brdfints(mu,1)
 	 tdd=exp(-sodtot/xmus)
 	 tdu=exp(-sodtot/xmuv)
 	 tsd=sdtott-tdd
@@ -3634,79 +3571,27 @@ C   compute ratios and transmissions
 	 
 c compute coefficients
 	 
-	 coefc=(rapp/tgasm-ainr(1,1)/tgasm)
+	 coefc=-(rapp/tgasm-ainr(1,1)/tgasm)
 	  
 	 coefb=tdd*tdu+tdu*tsd*robarstar+tsu*tdd*robarpstar
 	 coefb=coefb+tsu*tsd*robarbarstar
 	 
-	 coefa=sdtott*sutott*sast*robarbarstar*roglamb
-	 coefa=coefa/(1-sast*roglamb)
-	 rogbrdf=coefc/(coefa+coefb) 
+	 coefa=sdtott*sutott*sast*robarbarstar*robarbarstar
+	 coefa=coefa/(1-sast*(robarbarstar))
 	 
+c solve equations, compute solutions
+         discri=sqrt(coefb*coefb-4*coefa*coefc)
+         rogbrdf=(-coefb+discri)/(2*coefa)
 
-c second pass use update value for rbard
-         rbardest=robarbarstar*rogbrdf
-	 coefb=tdd*tdu+tdu*tsd*robarstar+tsu*tdd*robarpstar
-	 coefb=coefb+tsu*tsd*robarbarstar
-	 
-	 coefa=sdtott*sutott*sast*robarbarstar*rbardest
-	 coefa=coefa/(1-sast*rbardest)
-	 rogbrdf=coefc/(coefa+coefb) 
-c	 write(6,*) "first estimate rogbrdf",rogbrdf
-c recompute the	rbardest for BRDF model 
-         if ((ibrdf.eq.10).or.(ibrdf.eq.11)) then
-c decompose for inclusion as ground boundary conditions in OS
-	 p1p=p1*rogbrdf/rocave
-	 p2p=p2*rogbrdf/rocave 
-	 p3p=p3*rogbrdf/rocave
-c	 write(6,*) "p1p,p2p,p3p ",p1p,p2p,p3p
-         rm(-mu)=phirad
-         rm(mu)=xmuv
-         rm(0)=xmus     
-	 if (ibrdf.eq.10) then     
-         call modisbrdffos(p1p,p2p,p3p,mu,rm,
-     s       rosur,wfisur,fisur)
-         endif
-	 if (ibrdf.eq.11) then     
-         call rlmaignanbrdffos(p1p,p2p,p3p,mu,rm,
-     s       rosur,wfisur,fisur)
-         endif
-c call ossurf to compute the actual brdf coupling  
-      rm(-mu)=-xmuv
-      rm(mu)=xmuv
-      rm(0)=-xmus
-      spalt=1000.
-      call ossurf(iaer_prof,tamoyp,trmoyp,pizmoy,tamoyp,trmoyp,spalt,
-     s               phirad,nt,mu,np,rm,gb,rp,rosur,wfisur,fisur,
-     s                     xlsurf,xlphim,nfi,rolutsurf)	 
-      romixsur=(xlsurf(-mu,1)/xmus)-romixatm
-      rbarc=lddiftt*ludirtt*robarstar*rogbrdf
-      rbarpc=ludiftt*lddirtt*robarpstar*rogbrdf
-      rdirc=ludirtt*lddirtt*rogbrdf
-c      write(6,*) "romixsur,rbarc,rbarpc,rdirc",romixsur,rbarc,rbarpc,rdirc
-      coefc=-(romixsur-rbarc-rbarpc-rdirc)
-      coefb=lddiftt*ludiftt
-      coefa=(lddiftt+lddirtt)*(ludiftt+ludirtt)*lsphalbt/(1.-lsphalbt*rbardest)
-      discri=sqrt(coefb*coefb-4*coefa*coefc)
-      rbard=(-coefb+discri)/(2*coefa)
-c        Write(6,*) "rbard albbrdf 1rst iteration", rbard,albbrdf
-      coefa=(lddiftt+lddirtt)*(ludiftt+ludirtt)*lsphalbt/(1.-lsphalbt*rbard)
-      discri=sqrt(coefb*coefb-4*coefa*coefc)
-      rbard=(-coefb+discri)/(2*coefa)
-c       Write(6,*) "rbard albbrdf 2nd iteration", rbard,albbrdf
-	 robarbarstar=rbard/rogbrdf
-	 coefc=(rapp/tgasm-ainr(1,1)/tgasm)
-	 coefb=tdd*tdu+tdu*tsd*robarstar+tsu*tdd*robarpstar
-	 coefb=coefb+tsu*tsd*robarbarstar
-	 coefa=sdtott*sutott*sast*robarbarstar*rbard
-	 coefa=coefa/(1-sast*rbardest)
-	 rogbrdf=coefc/(coefa+coefb) 
-c       
-       endif 
+c second pass use update value for rog
+         coefa=sdtott*sutott*sast*robarbarstar*robarbarstar  
+         coefa=coefa/(1-sast*(robarbarstar))
+         discri=sqrt(coefb*coefb-4*coefa*coefc)
+         rogbrdf=(-coefb+discri)/(2*coefa)
 	 else
 	 rogbrdf=rog
 	 endif
-3333     Continue	 
+	 
 C Correction in the Ocean case
          if (idirec.eq.1) then
          if (ibrdf.eq.6) then
@@ -3751,7 +3636,7 @@ c                   output editing formats                             c
 c                                                                      c
 c                                                                      c
 c**********************************************************************c
-   98 format(/////,1h*,30(1h*),17h 6SV version 2.1 ,31(1h*),t79               
+   98 format(/////,1h*,30(1h*),17h 6SV version 2.0 ,31(1h*),t79               
      s       ,1h*,/,1h*,t79,1h*,/,
      s       1h*,22x,34h geometrical conditions identity  ,t79,1h*,/,
      s       1h*,22x,34h -------------------------------  ,t79,1h*)
@@ -3885,7 +3770,7 @@ c**********************************************************************c
      s       1h*,15x,34h brdf selected                    ,t79,1h*,/,
      s 1h*,15x,49h     rodir    robar    ropbar    robarbar  albedo 
      s        ,t79,1h*,/,
-     s       1h*,15x,5(f9.5,1x),t79,1h*)
+     s       1h*,15x,5(f9.4,1x),t79,1h*)
   190 format(1h*,15x,31h brdf from in-situ measurements,t79,1h*)
   191 format(1h*,15x,23h Hapke's model selected,t79,1h*
      s       /,1h*,16x,3hom:,f5.3,1x,3haf:,f5.3,1x,3hs0:,f5.3,1x,
@@ -3937,9 +3822,6 @@ c**********************************************************************c
      s       /,1h*,12x,4hcAB:,f6.2,1x,3hcW:,f5.3,1x,2hN:,f5.3,1x,3hcn:
      s       ,f4.2,1x,5hrsl1:,f5.3,t79,1h*)
   211 format(1h*,15x,30h MODIS BRDF    model selected ,t79,
-     s       1h*,/,1h*,16x,4h  p1:,f6.3,1x,3hp2:,f6.3,1x,3hp3:,f6.3,1x
-     s       ,t79,1h*)
-  212 format(1h*,15x,30h RossLiMaignan model selected ,t79,
      s       1h*,/,1h*,16x,4h  p1:,f6.3,1x,3hp2:,f6.3,1x,3hp3:,f6.3,1x
      s       ,t79,1h*)
 

@@ -43,11 +43,11 @@ c - to vary the number of quadratures
       wlinf=wldis(linf)
       alphaa=alog(ext(lsup)*ome(lsup)/(ext(linf)*ome(linf)))/coef
       betaa=ext(linf)*ome(linf)/(wlinf**(alphaa))
-      tsca=taer55*betaa*(wl**alphaa)/ext(4)
+      tsca=taer55*betaa*(wl**alphaa)/ext(8)
       alphaa=alog(ext(lsup)/(ext(linf)))/coef
       betaa=ext(linf)/(wlinf**(alphaa))
-      tamoy=taer55*betaa*(wl**alphaa)/ext(4)
-      tamoyp=taer55p*betaa*(wl**alphaa)/ext(4)
+      tamoy=taer55*betaa*(wl**alphaa)/ext(8)
+      tamoyp=taer55p*betaa*(wl**alphaa)/ext(8)
       pizmoy=tsca/tamoy
       pizmoyp=pizmoy
       do 81 k=1,nbmu
@@ -84,6 +84,7 @@ c - to vary the number of quadratures
  81     continue
 c here we don't need coefficients for computation of the polarization
       ipol0=0
+c      write(6,*) "tamoy ",tamoy
       call trunca(coeff,ipol0)
       tamoy=tamoy*(1.-pizmoy*coeff)
       tamoyp=tamoyp*(1.-pizmoyp*coeff)

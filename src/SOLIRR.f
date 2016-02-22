@@ -242,6 +242,7 @@ c
      a   8.85,   8.83,   8.81/
       pas=0.0025
       iwl=(wl-0.250)/pas+1.5
+c      write(6,*) "sollirr wl iwl ",wl,iwl
       if(iwl.lt.0) goto 10
       swl=si(iwl)
       return

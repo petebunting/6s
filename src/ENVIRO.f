@@ -66,5 +66,6 @@ c
          else
          fr=1.
          endif
+c      write(6,*) "IN ENVIRO FR=",fr	 
       return
       end

@@ -605,28 +605,28 @@ c                            ***  gammad,  e = 1.  ***
       sgmr = 0.d0
       sgmt = 0.d0
       if (th22 .lt. t11) goto 47
-      assign 46 to l4
+      l4=1
       goto 61
 c
 46    continue
-      assign 48 to l4
+      l4=2
       goto 64
 c
 47    continue
       if (th22 .lt. t10) goto 50
-      assign 51 to l4
+      l4=3
       goto 62
 c
 51    continue
-      assign 46 to l4
+      l4=1
       goto 65
 c
 50    continue
-      assign 52 to l4
+      l4=4
       goto 63
 c
 52    continue
-      assign 48 to l4
+      l4=2
       goto 65
 c
 48    continue
@@ -645,14 +645,14 @@ c
 c
 c  ******************************    tl1 = 0.,  tl2=pi/2 - th1
 c
-61    assign 71 to l2
+61    l2=71
       goto 130
 71    y = pp
       if (y .gt. 0.d0) sgmr = sgmr + y
       if (y .lt. 0.d0) sgmt = sgmt - y
       y1  = ct1*cthm
       sg1 = sg1 + abs(y1)
-      goto l4
+      goto (46,48,51,52),l4
 c
 c  ******************************    tl1 = pi/2 - th1,  tl2=pi/2 - th
 c
@@ -662,20 +662,20 @@ c
       x1 = sqrt(1.d0 - x*x)
       fa = atan2(x1, x)
       fb = pi4 - fa
-      assign 72 to l2
+      l2=72
       goto 30
 c
 72    continue
       y = pp
       if (y .gt. 0.d0) sgmr = sgmr + y
       if (y .lt. 0.d0) sgmt = sgmt - y
-      assign 73 to l2
+      l2=73
       goto 130
 c
 73    y = pp - y
       if (y .gt. 0.d0) sgmr = sgmr + y
       if (y .lt. 0.d0) sgmt = sgmt - y
-      goto l4
+      goto (46,48,51,52),l4
 c
 c  ******************************   tl1 = pi/2 - th,  tl2=pi/2
 c
@@ -708,7 +708,7 @@ c
       i1   = ii + 1
       fa   = f(ii)
       fb   = f(i1)
-      assign 74 to l2
+c      assign 74 to l2
       goto 30
 c
 c  ******************************   tl1 = pi/2 - th,  tl2=pi/2
@@ -726,13 +726,13 @@ c
       x  = (x + x1)*x2
       y  = x*pi14
       sg = sg + abs(y)
-      goto l4
+      goto (46,48,51,52),l4
 c
 c  ******************************    tl1 = 0,  tl2=pi/2 - th
 c
 64    y1 = ct*cthm
       sg = sg + abs(y1)
-      goto l4
+      goto (46,48,51,52),l4
 c
 c  ******************************    tl1 = pi/2 - th1,  tl2=pi/2
 c
@@ -744,14 +744,14 @@ c
       x   = (x + x1)*x2
       y   = x*pi14
       sg1 = sg1 + abs(y)
-      goto l4
+      goto (46,48,51,52),l4
 c
 c  ******************************    p(fa, fb)
 c
 30    x  = fb - fa
       if (x .gt. eps5) goto 31
       pp = 0.d0
-      goto l2
+      goto 74
 31    if ((pi4 - x) .lt. eps5) goto 130
       sfa = sin(fa)
       sfb = sin(fb)
@@ -764,12 +764,12 @@ c
       pp  = pp + stt1*.5d0*y1*sthm*sthm
       y1  = s2*(sfb - sfa) + s3*x
       pp  = pp + y1*sthm*cthm
-      goto l2
+      goto 74
 c
 130   x  = sthm*sthm
       pp = calph*x + ctt1*(2.d0 - 3.d0*x)
       pp = pp*pi
-      goto l2
+      goto 74
 c
       end
 *

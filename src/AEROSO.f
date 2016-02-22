@@ -50,7 +50,8 @@ c      if(iaer.eq.0) return
         read(10,'(///)')
         do k=1,nbmu
           read(10,'(8x,20(1x,e10.4))')(phasel(l,k),l=1,20)
-        enddo   
+        enddo  
+	
 	if (ipol.ne.0)then
 	  do k=1,nbmu
  	    read(10,'(8x,20(1x,e10.4))')(qhasel(l,k),l=1,20)

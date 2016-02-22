@@ -39,8 +39,8 @@ C azimuth or scattering angle variable for LUT computation (rolut)
 C azimuth table for look up table computation (filut), nb of fi in each case (nfilut)
       real    luttv,lutmuv,iscama,iscami,its,scaa
       integer nbisca
-      real    rolut(mu,41),rolutq(mu,41),rolutu(mu,41)
-      real    filut(mu,41)
+      real    rolut(mu,61),rolutq(mu,61),rolutu(mu,61)
+      real    filut(mu,61)
       integer nfilut(mu)
 CCCC End Variable for Look up table generation      
       

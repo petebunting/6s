@@ -10,7 +10,7 @@ c - to vary the number of quadratures
       common /sixs_polar/ pha(nqmax_p),qha(nqmax_p),uha(nqmax_p),
      &alphal(0:nqmax_p),betal(0:nqmax_p),gammal(0:nqmax_p),
      &zetal(0:nqmax_p)
-      integer nbmu
+      real nbmu
 c - to vary the number of quadratures
 
 
@@ -28,9 +28,8 @@ c array for sos computation
 CCCC Begin Variable for Look up table generation      
 C azimuth or scattering angle variable for LUT computation (rolut)
 C azimuth table for look up table computation (filut), nb of fi in each case (nfilut)
-      real    luttv,lutmuv,iscama,iscami,scaa
-      integer nbisca,its
-      real    rolut(mu,61),filut(mu,61)
+      real    luttv,lutmuv,iscama,iscami,nbisca,its,scaa
+      real    rolut(mu,41),filut(mu,41)
       double precision psl(-1:nqmax_p,-mu:mu) 
       integer nfilut(mu)
 CCCC End Variable for Look up table generation      
@@ -256,7 +255,7 @@ c
 CCC initialization of look up table variable
       do i=1,mu
       nfilut(i)=0
-      do j=1,61
+      do j=1,(nbmu-1)/2
       rolut(i,j)=0.
       filut(i,j)=0.
       enddo
@@ -666,7 +665,6 @@ c     if(z.gt.0.001) go to 24     #6Sv4.0 choice
    24 continue
   243 continue
       nt=snt
-c      write(6,*) "in oS",tamoy,trmoy,xl(-mu,1)/rm(0)
-c      write(6,*) 'reflectance ', xl(mu,1)/xmus
+c     write(6,*) 'reflectance ', xl(mu,1)/xmus
       return
       end

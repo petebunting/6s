@@ -1,5 +1,5 @@
-      subroutine os (iaer_prof,tamoy,trmoy,pizmoy,tamoyp,trmoyp,palt,
-     s               phirad,nt,mu,np,rm,gb,rp,
+      subroutine ossurf(iaer_prof,tamoy,trmoy,pizmoy,tamoyp,trmoyp,palt,
+     s               phirad,nt,mu,np,rm,gb,rp,rosur,wfisur,fisur,
      s                     xl,xlphim,nfi,rolut)
 
 c - to vary the number of quadratures
@@ -54,24 +54,28 @@ CCCC End Variable for Look up table generation
       double precision xx,xdb,bpjk,bpjmk,z,xi1,xi2,x,xpj,ypk,a,b,ii1,ii2
       integer igmax,iaer_prof
 
+c  Variable for ground boundary conditions
+      real rosur(0:mu_p,mu_p,83),fisur(83),wfisur(83)
+      real srosur(0:mu_p,mu_p),pisp
 
      
       common/sixs_del/delta,sigma
       common/sixs_ier/iwr,ier
       common /multorder/ igmax
 
+c      igmax=1
       nbmu=nquad
 c the optical thickness above plane are recomputed to give o.t above pla
 c     write(6,*) 'tamoy,trmoy,tamoyp,trmoyp,palt,pizmoy'
 c      write(6,*) tamoy,trmoy,tamoyp,trmoyp,palt,pizmoy
-c      write(6,*) 'betal 0:80'
-c      do i=0,80
-c        write(6,*) i,betal(i)
-c      enddo
-c      write(6,*) 'phase function 83 terms'
-c      do i=1,83
-c        write(6,*) pha(i)
-c      enddo
+c       write(6,*) 'betal 0:80'
+c       do i=0,80
+c         write(6,*) i,betal(i)
+c       enddo
+c       write(6,*) 'phase function 83 terms'
+c       do i=1,83
+c         write(6,*) pha(i)
+c       enddo
       snt=nt
       hr=8.0
       ta=tamoy
@@ -79,8 +83,9 @@ c      enddo
       trp=trmoy-trmoyp
       tap=tamoy-tamoyp
       piz=pizmoy
-c     print *, 'ta,tr,piz,tap,trp,palt,nt'
-c     print *,ta,tr,piz,tap,trp,palt,nt
+c      print *, 'ta,tr,piz,tap,trp,palt,nt,piz'
+c      print *,ta,tr,piz,tap,trp,palt,nt,piz
+      pisp=acos(-1.)
       iplane=0
       accu=1.e-20
       accu2=1.e-3
@@ -111,10 +116,12 @@ c
       xmus=-rm(0)
 c
 c compute mixing rayleigh, aerosol
-c case 1: pure rayleigh
+c case 1: pure rayleighnedit 
 c case 2: pure aerosol
 c case 3: mixing rayleigh-aerosol
 c
+c      write(6,*) "rosur ",rosur
+c      stop
       if((ta.le.accu2).and.(tr.gt.ta)) then
       do j=0,ntp
       h(j)=j*tr/ntp
@@ -183,6 +190,7 @@ c
 c     print *,'discre ',it,cr,ca,xdel(it),ydel(it),zx
   14  continue
       endif
+c comment the aero_prof Vermote 11/20/2010
 
       if(tr.gt.acu2.and.ta.gt.acu2.and.iaer_prof.eq.1)then
        call aero_prof(ta,piz,tr,hr,ntp,xmus,
@@ -239,10 +247,10 @@ c update the layer from the end to the position to update if necessary
       endif
 c
 c
-c     print *,ha,hr,palt,ta,tr,tap,trp
-c     do i=0,nt
-c     print *,i,h(i),ch(i),xdel(i),ydel(i),altc(i)
-c     enddo
+c      print *,ha,hr,palt,ta,tr,tap,trp
+c      do i=0,nt
+c      print *,i,h(i),ch(i),xdel(i),ydel(i),altc(i)
+c      enddo
 c
       pi=acos(-1.)
       phi=phirad
@@ -256,7 +264,7 @@ c
 CCC initialization of look up table variable
       do i=1,mu
       nfilut(i)=0
-      do j=1,61
+      do j=1,(nbmu-1)/2
       rolut(i,j)=0.
       filut(i,j)=0.
       enddo
@@ -310,6 +318,15 @@ c
       beta2=0.5*ron
 c
 c     fourier decomposition
+c      write(6,*) "rosur(0,mu,1)",rosur(0,mu,1),rm(0),rm(mu),fisur(1)
+c      write(6,*) "rosur",rosur
+c      do i=0,mu
+c      do j=1,mu
+c      do k=1,83
+c      rosur(i,j,k)=0.4
+c      enddo
+c      enddo
+c      enddo
 c
       do 17 j=-mu,mu
       i4(j)=0.
@@ -318,6 +335,17 @@ c
       if( abs (xmus-1.000000) .lt.1.e-06)iborm=0
       do 24 is=0,iborm
 c
+c compute fourier component of the surface term for is=0
+      do i=0,mu
+      do j=1,mu
+      srosur(i,j)=0.0
+      do k=1,83
+      srosur(i,j)=srosur(i,j)+2.*rosur(i,j,k)*wfisur(k)*cos(is*fisur(k))
+      enddo
+      srosur(i,j)=srosur(i,j)/pisp
+      enddo
+      enddo
+      
 c    primary scattering
 c
       ig=1
@@ -357,7 +385,7 @@ c     vertical integration, primary upward radiation
 c
  
       do 108 k=1,mu
-      i1(nt,k)=0.
+      i1(nt,k)=srosur(0,k)*xmus*exp(-h(nt)/xmus)/2.0
       zi1=i1(nt,k)
       yy=rm(k)
       do 108 i=nt-1,0,-1
@@ -409,7 +437,7 @@ c
 c     loop on successive order
 c
   503 ig=ig+1
-c     write(6,*) 'ig ',ig
+c      write(6,*) 'ig ',ig
 c
 c     successive orders
 c
@@ -471,6 +499,10 @@ c     vertical integration, upward radiation
 c
  213  do 48 k=1,mu
       i1(nt,k)=0.
+c  the surface contribution at the boundary layer
+      do l=1,mu
+      i1(nt,k)=i1(nt,k)+2.*gb(l)*i1(nt,-l)*rm(l)*srosur(l,k)/2.0
+      enddo
       zi1=i1(nt,k)
       yy=rm(k)
       do 48 i=nt-1,0,-1
@@ -666,7 +698,7 @@ c     if(z.gt.0.001) go to 24     #6Sv4.0 choice
    24 continue
   243 continue
       nt=snt
-c      write(6,*) "in oS",tamoy,trmoy,xl(-mu,1)/rm(0)
+c     write(6,*) "in oS",tamoy,trmoy,xl(-mu,1)/rm(0)
 c      write(6,*) 'reflectance ', xl(mu,1)/xmus
       return
       end
